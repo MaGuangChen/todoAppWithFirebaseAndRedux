@@ -1,6 +1,6 @@
 var redux = require('redux');
 var {searchTextReducer, showCompletedReducer, todosReducer} = require('reducers');
-
+// initialState為初始之state
 export var configure = (initialState = {}) => {
   var reducer = redux.combineReducers({
     searchText: searchTextReducer,

@@ -5,7 +5,7 @@ var TestUtils = require('react-addons-test-utils');
 var expect = require('expect');
 var $ = require('jquery');
 
-import {configure} from 'configureStore';
+import { configure } from 'configureStore';
 import ConnectedTodoList, {TodoList} from 'TodoList';
 import ConnectedTodo, {Todo} from 'Todo'
 
