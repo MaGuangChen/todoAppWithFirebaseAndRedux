@@ -24,13 +24,8 @@ export var todosReducer = (state = [], action) => {
     case 'ADD_TODO':
       return [
         ...state,
-        {
-          id: uuid(),
-          text: action.text,
-          completed: false,
-          createdAt: moment().unix(),
-          completedAt: undefined
-        }
+        // 因為我們要用firebase
+        action.todo
       ];
     case 'TOGGLE_TODO':
       return state.map((todo) => {

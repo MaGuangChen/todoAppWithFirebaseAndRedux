@@ -1,5 +1,11 @@
 var expect = require('expect');
+import configureMocksStore from 'redux-mock-store';
+import thunk from 'redux-thunk';
+
 var actions = require('actions');
+
+// 另外開store for test，使用thunk為中介軟體
+const createMockStore = configureMocksStore([thunk]);
 
 describe('Actions', () => {
   it('should generate search text action', () => {
@@ -24,9 +30,14 @@ describe('Actions', () => {
   it('should generate add todo action', () => {
     var action = {
       type: 'ADD_TODO',
-      text: 'Thing to do'
+      todo: {
+        id: '123abc',
+        text: 'Anything we like',
+        completed: false,
+        createdAt: 0,
+      }
     };
-    var res = actions.addTodo(action.text);
+    var res = actions.addTodo(action.todo);
 
     expect(res).toEqual(action);
   });
@@ -46,6 +57,29 @@ describe('Actions', () => {
     var res = actions.addTodos(todos);
 
     expect(res).toEqual(action);
+  });
+
+  // 有async test時，要用done讓mocha知道要等這個執行完
+  it('should create todo and dispatch ADD_TODO', (done) => {
+    const store = createMockStore({});
+    const todoText = 'My todo item';
+
+    store.dispatch(actions.startAddTodo(todoText))
+    .then(() => {
+      // getActions是store的method，為redux的api
+      const actions = store.getActions();
+      
+      expect(actions[0]).toInclude({
+        type: 'ADD_TODO',
+      });
+
+      expect(actions[0].todo).toInclude({
+        text: todoText,
+      });
+      // 這邊的done是告訴karma不用等啦，已經可以了
+      done();
+    })
+    .catch(done);
   });
 
   it('should generate toggle todo action', () => {
