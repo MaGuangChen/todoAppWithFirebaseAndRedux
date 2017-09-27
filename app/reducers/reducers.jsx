@@ -27,15 +27,13 @@ export var todosReducer = (state = [], action) => {
         // 因為我們要用firebase
         action.todo
       ];
-    case 'TOGGLE_TODO':
+    case 'UPDATE_TODO':
       return state.map((todo) => {
         if (todo.id === action.id) {
-          var nextCompleted = !todo.completed;
-
           return {
-            ...todo,
-            completed: nextCompleted,
-            completedAt: nextCompleted ? moment().unix() : undefined
+            ...todo,// 第一個剩餘參數將會取得所有todo
+            ...action.updates,
+            // 第二個剩餘參數將會over write第一個剩餘參數
           };
         } else {
           return todo;

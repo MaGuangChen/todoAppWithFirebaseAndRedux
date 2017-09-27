@@ -1,6 +1,7 @@
 var expect = require('expect');
 import configureMocksStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
+import firebase, { firebaseRef } from 'app/firebase';
 
 var actions = require('actions');
 
@@ -82,13 +83,58 @@ describe('Actions', () => {
     .catch(done);
   });
 
-  it('should generate toggle todo action', () => {
+  it('should generate update todo action', () => {
     var action = {
-      type: 'TOGGLE_TODO',
-      id: '123'
+      type: 'UPDATE_TODO',
+      id: '123',
+      updates: {completed: false}
     };
-    var res = actions.toggleTodo(action.id);
+    var res = actions.updateTodo(action.id, action.updates);
 
     expect(res).toEqual(action);
   });
+
+
+  describe('Tests with firebase todos', () =>{
+    let testTodoRef;
+    // beforeEach是mocha的api，可以讓我們在每一個
+    // 測試開始前先run此function
+    beforeEach((done) => {
+      testTodoRef = firebaseRef.child('todos').push();
+      testTodoRef.set({
+        text: 'Something to do',
+        completed: false,
+        createdAt: 23453453,
+      }).then(() => done());
+    });
+    // afterEach是mocha的api，可以讓我們在每一個
+    // 測試開始完成後run此function
+    afterEach((done) => {
+      testTodoRef.remove().then(() => done());
+    });
+
+    it('should toggle todo and dispatch UPDATE_TODO action', (done) => {
+      const store = createMockStore({});
+      const action = actions.startToggleTodo(testTodoRef.key, true);
+
+      store.dispatch(action)
+      .then(() => {
+        // 取得store內的全部actions
+        const mockActions = store.getActions();
+        
+        expect(mockActions[0]).toInclude({
+          type: 'UPDATE_TODO',
+          id: testTodoRef.key,
+        });
+        expect(mockActions[0].updates).toInclude({
+          completed: true,
+        });
+        expect(mockActions[0].updates.completedAt).toExist();
+        
+        done();
+      }, done);
+    });
+
+  });
+
 });
