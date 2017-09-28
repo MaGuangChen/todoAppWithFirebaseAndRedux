@@ -100,12 +100,18 @@ describe('Actions', () => {
     // beforeEach是mocha的api，可以讓我們在每一個
     // 測試開始前先run此function
     beforeEach((done) => {
-      testTodoRef = firebaseRef.child('todos').push();
-      testTodoRef.set({
-        text: 'Something to do',
-        completed: false,
-        createdAt: 23453453,
-      }).then(() => done());
+      const todosRef = firebaseRef.child('todos');
+      // 先清空todos再建立
+      todosRef.remove().then(() => {
+        testTodoRef = firebaseRef.child('todos').push();
+        return testTodoRef.set({
+          text: 'Something to do',
+          completed: false,
+          createdAt: 23453453,
+        })
+      })
+      .then(() => done())
+      .catch(done);     
     });
     // afterEach是mocha的api，可以讓我們在每一個
     // 測試開始完成後run此function
@@ -133,6 +139,21 @@ describe('Actions', () => {
         
         done();
       }, done);
+    });
+    
+    it('should populate todos and dispatch todo', (done) => {
+      const store = createMockStore({});
+      const action = actions.startAddTodos();
+
+      store.dispatch(action).then(() =>{
+        const mockActions = store.getActions();
+
+        expect(mockActions[0].type).toEqual('ADD_TODOS');
+        expect(mockActions[0].todos.length).toEqual(1);
+        expect(mockActions[0].todos.text).toEqual('Something to do');
+        // 這邊叫完done後才去跑afterEach喔
+        done();
+      }, done)
     });
 
   });
